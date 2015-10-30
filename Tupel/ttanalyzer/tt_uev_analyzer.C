@@ -70,9 +70,9 @@ void tt_uev_analyzer::Loop()
 //    fChain->GetEntry(jentry);       //read all branches
 //by  b_branchname->GetEntry(ientry); //read only this branch
    if (fChain == 0) return;
- standalone_LumiReWeighting puWeight(2015), puUp(2015,1), puDown(2015,-1);
+ standalone_LumiReWeighting puWeight(201550), puUp(201550,1), puDown(201550,-1);
    Long64_t nentries = fChain->GetEntries();
-  // nentries = 100;
+//   if(!realdata && nentries > 1000000)nentries = 1000000;
  TH1::SetDefaultSumw2();
  TH2::SetDefaultSumw2();
  TProfile::SetDefaultSumw2();
@@ -100,6 +100,13 @@ void tt_uev_analyzer::Loop()
    TH1* h_dphi_ttbar_pf= new TH1D ("dphi_ttbar_pf","dphi_ttbar_pf",20,0,180);
    TH1* h_njet_ttbar= new TH1D ("njet_ttbar","njet_ttbar",15,-0.5,14.5);
    TH1* h_njet_15_ttbar= new TH1D ("njet_15_ttbar","njet_15_ttbar",15,-0.5,14.5);
+   TH1* h_njet_bb= new TH1D ("njet_bb","njet_bb",15,-0.5,14.5);
+
+   TH1* h_pt_ttbar_kinrec= new TH1D ("pt_ttbar_kinrec","pt_ttbar_kinrec",10,pt_tt_range);
+   TH1* h_nu_pz= new TH1D ("nu_pz","nu_pz",5000,0,1000);
+   TH1* h_nu_pt= new TH1D ("nu_pt","nu_pt",5000,0,1000);
+
+
    TH1* h_n_bjet= new TH1D ("n_bjet","n_bjet",15,-0.5,14.5);
    TH1* h_deltar_pf_jetpf= new TH1D ("deltar_pf_jetpf","deltar_pf_jetpf",1000,0,5);
    TH1* h_deltar_pf_jet= new TH1D ("deltar_pf_jet","deltar_pf_jet",1000,0,5);
@@ -170,6 +177,8 @@ void tt_uev_analyzer::Loop()
    TProfile* h_profile_ptttbar_sumpt_toward= new TProfile ("profile_ptttbar_sumpt_toward","profile_ptttbar_sumpt_toward",10,pt_tt_range,0,1000);
    TProfile* h_profile_ptttbar_avept_toward= new TProfile ("profile_ptttbar_avept_toward","profile_ptttbar_avept_toward",10,pt_tt_range,0,1000);
 
+   TProfile* h_profile_deta_bb_njet_bb= new TProfile ("profile_deta_bb_njet_bb","profile_deta_bb_njet_bb",10,0,5,0,1000);
+   TProfile* h_profile_deta_bb_njet_extra= new TProfile ("profile_deta_bb_njet_extra","profile_deta_bb_njet_extra",10,0,5,0,1000);
 
    TH1* h_nvtx= new TH1D ("nvtx_npf","nvtx_npf",50,0,50);
    TH1* h_pf_dxy= new TH1D ("pf_dxy","pf_dxy",1000,0,2);
@@ -178,6 +187,8 @@ void tt_uev_analyzer::Loop()
    TH1* h_pf_sigmadz= new TH1D ("pf_sigmadz","pf_sigmadz",1000,0,25);
    TH1* h_pf_pt=new TH1D ("pf_pt","pf_pt",20000,0,2000);
    TH1* h_csv=new TH1D("csv","csv",1000,-1,1);
+   TH1* h_csvmax=new TH1D("csvmax","csvmax",1000,-1,1);
+   TH1* h_csvmax2=new TH1D("csvmax2","csvmax2",1000,-1,1);
    TH1* h_npf_inclusive=new TH1D ("npf_inclusive","npf_inclusive",140,0,140);
    TH1* h_npf_toward=new TH1D ("npf_toward","npf_toward",140,0,140);
    TH1* h_npf_transverse=new TH1D ("npf_transverse","npf_transverse",140,0,140);
@@ -193,8 +204,36 @@ void tt_uev_analyzer::Loop()
    TH1* h_ptavepf_transverse=new TH1D ("ptavepf_transverse","ptavepf_transverse",50,0,25);
    TH1* h_ptavepf_away=new TH1D ("ptavepf_away","ptavepf_away",50,0,25);
 
-TH1*h_puweight=new TH1D("puweight","puweight",100000000,0,100000000);
+TH1*h_puweight=new TH1D("puweight","puweight",10000,0,1000);
+TH1*h_puweight_weighted=new TH1D("puweight_weighted","puweight_weighted",10000,0,1000);
+
+TH1*h_puweight_meas=new TH1D("puweight_meas","puweight_meas",10000,0,1000);
+TH1*h_puweight_weighted_meas=new TH1D("puweight_weighted_meas","puweight_weighted_meas",10000,0,1000);
+   TH1* h_MTW= new TH1D ("MTW","MTW",100,0,1000);
+   TH1* h_m_thad= new TH1D ("m_thad","m_thad",100,0,1000);
+   TH1* h_m_tlep= new TH1D ("m_tlep","m_tlep",100,0,1000);
+
+   TH1* h_m_top= new TH1D ("m_top","m_top",100,0,1000);
+   TH1* h_m_atop= new TH1D ("m_atop","m_atop",100,0,1000);
+
+
    double wtot=0;
+   double sum_tot_weight=0;
+   int sum_no=0;
+   int N_HLT_Mu20=0;
+   int N_HLT_TkMu20=0;
+   int N_HLT_Mu18=0;
+   int N_HLT_TkMu18=0;
+   int N_HLT_Mu20_eta2p1=0;
+   int N_HLT_TkMu20_eta2p1=0;
+   int N_HLT_Mu18_eta2p1=0;
+   int N_HLT_TkMu18_eta2p1=0;
+   int N_HLT_Mu24_eta2p1=0;
+   int N_HLT_TkMu20ORMu20=0;
+   int ntottt=0;
+   double real_count=0;
+   double complex_count=0;
+   double solved_complex_count=0;
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
@@ -213,6 +252,7 @@ TH1*h_puweight=new TH1D("puweight","puweight",100000000,0,100000000);
       int jet_index=0;	
       int njet_15=0;
       vector<TLorentzVector>jet_vector;
+      vector<TLorentzVector>jet_vector_1530;
       vector<vector<double> >jet_ConstId;
       vector<vector<double> >jet_ConstPt;
       vector<vector<double> >jet_ConstEta;
@@ -231,12 +271,18 @@ TH1*h_puweight=new TH1D("puweight","puweight",100000000,0,100000000);
       double w=1;
       if(mcWeights_->size()>0)w=mcWeights_->at(0);
 //cout<<"tttttttttttttttt"<<endl;
-      if(!realdata){h_puweight->Fill(puWeight.weight(int(PU_npT)),w);
-      w*=puWeight.weight(int(PU_npT));}
-      
+      if(!realdata && PU_npT>0){    
+//        wtot_write-=w;
+        w*=puWeight.weight(int(PU_npT));  
+        sum_tot_weight+= puWeight.weight(int(PU_npT));
+        sum_no++;
+//        wtot_write+=w;
+      }
+      h_puweight->Fill(puWeight.weight(int(PU_npT)));
+      h_puweight_weighted->Fill(puWeight.weight(int(PU_npT)),w);
       wtot+=wtot_write;
 //cout<<"aaaaaaaaaaaaaaaaaaaaaaa"<<endl;
-
+      if(!HLT_IsoTkMu20&&!HLT_IsoMu20) continue; //OR requirement of IsoTkMu20 and IsoMu20
       for(unsigned int mu_ind=0; mu_ind<patMuonPt_->size();mu_ind++){
         if(patMuonCombId_->at(mu_ind)>0&& fabs(patMuonEta_->at(mu_ind))<2.1){
           h_mu_pt->Fill(patMuonPt_->at(mu_ind),w);
@@ -244,19 +290,20 @@ TH1*h_puweight=new TH1D("puweight","puweight",100000000,0,100000000);
           h_mu_phi->Fill(patMuonPhi_->at(mu_ind),w);
           h_mu_iso->Fill(patMuonPfIsoDbeta_->at(mu_ind),w);
         }
-        if(patMuonPt_->at(mu_ind)>26 && fabs(patMuonEta_->at(mu_ind))<2.1 &&patMuonCombId_->at(mu_ind)>0 &&fabs(patMuonPfIsoDbeta_->at(mu_ind))<0.15){
+        if(patMuonPt_->at(mu_ind)>22 && fabs(patMuonEta_->at(mu_ind))<2.4 &&patMuonCombId_->at(mu_ind)>0 &&fabs(patMuonPfIsoDbeta_->at(mu_ind))<0.15){
           TLorentzVector tmp;
           tmp.SetPtEtaPhiE(patMuonPt_->at(mu_ind),patMuonEta_->at(mu_ind),patMuonPhi_->at(mu_ind),patMuonEn_->at(mu_ind));
           mu_vector.push_back(tmp);
           mu_charge.push_back(patMuonCharge_->at(mu_ind));
           mu_index++;
        }
-        if(patMuonPt_->at(mu_ind)>10 && fabs(patMuonEta_->at(mu_ind))<2.1){
+        if(patMuonPt_->at(mu_ind)>15 && fabs(patMuonEta_->at(mu_ind))<2.4 && fabs(patMuonPfIsoDbeta_->at(mu_ind))<0.3){
           mu_index20++;
        }
      }
 //cout<<"2222222222"<<endl;
       int ind_jet_const=0;
+      double csvmax=-99., csvmax2=-99.;
       for(unsigned int jet_ind=0; jet_ind<patJetPfAk04Pt_->size();jet_ind++){
         if(jet_ind>=1)ind_jet_const+=patJetPfAk04nconst_->at(jet_ind-1);
         if( fabs(patJetPfAk04Eta_->at(jet_ind))>2.4 ||patJetPfAk04LooseId_->at(jet_ind)==0)continue;
@@ -269,11 +316,16 @@ TH1*h_puweight=new TH1D("puweight","puweight",100000000,0,100000000);
 
         if(dr_j_l<0.4)continue;
         if(patJetPfAk04Pt_->at(jet_ind)>15.)njet_15++;
+       if(patJetPfAk04Pt_->at(jet_ind)>15. &&patJetPfAk04Pt_->at(jet_ind)<30.)jet_vector_1530.push_back(tmp);
         if(patJetPfAk04Pt_->at(jet_ind)<30.)continue;
         jet_vector.push_back(tmp);
         if(mu_index==1 &&mu_index20==1)h_csv->Fill(patJetPfAk04BDiscCSVv2_->at(jet_ind),w);
-        if(patJetPfAk04BDiscCSVv2_->at(jet_ind)>0.941)b_jet_index.push_back(jet_index);
+        if(patJetPfAk04BDiscCSVv2_->at(jet_ind)>0.89)b_jet_index.push_back(jet_index);
        // cout<<"nconst "<<jet_ind<<" "<<patJetPfAk04nconst_->at(jet_ind)<<"  "<<patJetPfAk04ConstId->size()<<endl;
+
+        if(patJetPfAk04BDiscCSVv2_->at(jet_ind)>csvmax)csvmax=patJetPfAk04BDiscCSVv2_->at(jet_ind);
+        if(patJetPfAk04BDiscCSVv2_->at(jet_ind)>csvmax2 && patJetPfAk04BDiscCSVv2_->at(jet_ind)<csvmax)csvmax2=patJetPfAk04BDiscCSVv2_->at(jet_ind);
+
         vector<double>tmp1;
         vector<double>tmp2;
         vector<double>tmp3;
@@ -299,9 +351,28 @@ TH1*h_puweight=new TH1D("puweight","puweight",100000000,0,100000000);
         jet_index++;
       }
 
-        if(jet_vector.size()>=4 && mu_index==1 &&mu_index20==1)h_n_bjet->Fill(b_jet_index.size(),w);
+      
+      if(jet_vector.size()>=4 && mu_index==1 &&mu_index20==1){
+          h_n_bjet->Fill(b_jet_index.size(),w);
+          h_csvmax->Fill(csvmax,w);
+          h_csvmax2->Fill(csvmax2,w);
+      }
+      if (jet_vector.size()>=4 && b_jet_index.size()==2 && mu_index==1 &&mu_index20==1){//at least 4 jets, 2 of b jets, 1 muon
+      ntottt++;
+      if(HLT_IsoMu20)N_HLT_Mu20++;
+      if(HLT_IsoTkMu20)N_HLT_TkMu20++;
+      if(HLT_IsoTkMu20||HLT_IsoMu20)N_HLT_TkMu20ORMu20++;
+      if(HLT_IsoMu18)N_HLT_Mu18++;
+      if(HLT_IsoTkMu20)N_HLT_TkMu18++;
 
-       if (jet_vector.size()>=4 && b_jet_index.size()==2 && mu_index==1 &&mu_index20==1){//at least 4 jets, 2 of b jets, 1 muon
+      if(HLT_IsoMu20_eta2p1)N_HLT_Mu20_eta2p1++;
+      if(HLT_IsoTkMu20_eta2p1)N_HLT_TkMu20_eta2p1++;
+      if(HLT_IsoMu18_eta2p1)N_HLT_Mu18_eta2p1++;
+      if(HLT_IsoTkMu20_eta2p1)N_HLT_TkMu18_eta2p1++;
+      if(HLT_IsoMu24_eta2p1)N_HLT_Mu24_eta2p1++;
+      h_puweight_meas->Fill(puWeight.weight(int(PU_npT)));
+      h_puweight_weighted_meas->Fill(puWeight.weight(int(PU_npT)),w);
+
 
           h_mu_pt_meas->Fill(patMuonPt_->at(0),w);
           h_mu_eta_meas->Fill(patMuonEta_->at(0),w);
@@ -309,6 +380,309 @@ TH1*h_puweight=new TH1D("puweight","puweight",100000000,0,100000000);
           h_mu_iso_meas->Fill(patMuonPfIsoDbeta_->at(0),w);
 
 
+
+
+//IMPLEMENTING KIN REC
+
+
+
+        double pz1=0;
+        double pz2=0;
+        double MW=80.4;
+        double ptl=mu_vector[0].Pt();
+        double pzl=mu_vector[0].Pz();
+        double El=mu_vector[0].E();
+        double ptnu= METPt->at(1);
+        TLorentzVector met;
+        met.SetPxPyPzE(METPx->at(1),METPy->at(1),METPz->at(1),METE->at(1));
+        double deltaphi=DeltaPhi(mu_vector[0].Phi(), met.Phi());
+        double cdphi= cos(deltaphi);
+	double MTW=sqrt(2*ptl*ptnu*(1 -cdphi ));
+        double mu= MW*MW/2 + ptl*ptnu*cdphi;
+
+        double A=mu*pzl/(ptl*ptl);
+        double B=mu*mu*pzl*pzl/(pow(ptl,4));
+        double C= (El*El*ptnu*ptnu- mu*mu)/(ptl*ptl);
+        double D=0;
+
+        ////cout<<MTW<<endl;
+        h_MTW->Fill(MTW,w);
+        TLorentzVector nu_complex;
+        bool found=false;  
+        if((B-C)<0){
+        //cout<<"new complex event "<<MTW<<endl;
+
+        double min_i=0;
+        double max_i=80;
+        
+          for(double px_var=min_i;px_var<max_i;px_var+=0.3){
+//              double py_var=px_var;
+            for(double py_var=0;py_var<=px_var;py_var+=0.3){
+              TLorentzVector met_new1;
+              met_new1.SetPxPyPzE(METPx->at(1)+px_var,METPy->at(1)+py_var,METPz->at(1),METE->at(1));
+              double deltaphi_new1=DeltaPhi(mu_vector[0].Phi(), met_new1.Phi());
+              double cdphi_new1= cos(deltaphi_new1);
+   	      double MTW_new1=sqrt(2*ptl*met_new1.Pt()*(1 -cdphi_new1 ));
+              if(MTW_new1>80.399&&MTW_new1<80.401){//cout<<"MTW old, px var +, py var +, MTW new "<<MTW<<"  "<<px_var<<"  "<<py_var<<"  "<<MTW_new1<<endl;
+                double ptnun=met_new1.Pt();
+                double mun= MW*MW/2 + ptl*ptnun*cdphi_new1;
+                double An=mun*pzl/(ptl*ptl);
+                //double Bn=mun*mun*pzl*pzl/(pow(ptl,4));
+                //double Cn= (El*El*ptnun*ptnun- mun*mun)/(ptl*ptl);
+                //double Dn=0;
+                //cout<<"B, C, B-C old; B, C, B-C new"<<B<<"  "<<C<<"  "<<B-C<<"  "<<Bn<<"  "<<Cn<<"  "<<Bn-Cn<<endl;
+                A=An;
+                nu_complex=met_new1;
+                found=true;
+                break;
+              }
+              TLorentzVector met_new2;
+              met_new2.SetPxPyPzE(METPx->at(1)+px_var,METPy->at(1)-py_var,METPz->at(1),METE->at(1));
+              double deltaphi_new2=DeltaPhi(mu_vector[0].Phi(), met_new2.Phi());
+              double cdphi_new2= cos(deltaphi_new2);
+   	      double MTW_new2=sqrt(2*ptl*met_new2.Pt()*(1 -cdphi_new2 ));
+              if(MTW_new2>80.399&&MTW_new2<80.401){//cout<<"MTW old, px var +, py var -, MTW new "<<MTW<<"  "<<px_var<<"  "<<py_var<<"  "<<MTW_new2<<endl;
+                double ptnun=met_new2.Pt();
+                double mun= MW*MW/2 + ptl*ptnun*cdphi_new2;
+                double An=mun*pzl/(ptl*ptl);
+                //double Bn=mun*mun*pzl*pzl/(pow(ptl,4));
+                //double Cn= (El*El*ptnun*ptnun- mun*mun)/(ptl*ptl);
+                //double Dn=0;
+                //cout<<"B, C, B-C old; B, C, B-C new"<<B<<"  "<<C<<"  "<<B-C<<"  "<<Bn<<"  "<<Cn<<"  "<<Bn-Cn<<endl;
+                A=An;
+                nu_complex=met_new2;
+                found=true;
+                break;
+              }
+
+              TLorentzVector met_new3;
+              met_new3.SetPxPyPzE(METPx->at(1)-px_var,METPy->at(1)+py_var,METPz->at(1),METE->at(1));
+              double deltaphi_new3=DeltaPhi(mu_vector[0].Phi(), met_new3.Phi());
+              double cdphi_new3= cos(deltaphi_new3);
+   	      double MTW_new3=sqrt(2*ptl*met_new3.Pt()*(1 -cdphi_new3 ));
+              if(MTW_new3>80.399&&MTW_new3<80.401){//cout<<"MTW old, px var -, py var +, MTW new "<<MTW<<"  "<<px_var<<"  "<<py_var<<"  "<<MTW_new3<<endl;
+                double ptnun=met_new3.Pt();
+                double mun= MW*MW/2 + ptl*ptnun*cdphi_new3;
+                double An=mun*pzl/(ptl*ptl);
+                //double Bn=mun*mun*pzl*pzl/(pow(ptl,4));
+                //double Cn= (El*El*ptnun*ptnun- mun*mun)/(ptl*ptl);
+                //double Dn=0;
+                //cout<<"B, C, B-C old; B, C, B-C new"<<B<<"  "<<C<<"  "<<B-C<<"  "<<Bn<<"  "<<Cn<<"  "<<Bn-Cn<<endl;
+                A=An;
+                nu_complex=met_new3;
+                found=true;
+                break;
+              }
+
+              TLorentzVector met_new4;
+              met_new4.SetPxPyPzE(METPx->at(1)-px_var,METPy->at(1)-py_var,METPz->at(1),METE->at(1));
+              double deltaphi_new4=DeltaPhi(mu_vector[0].Phi(), met_new4.Phi());
+              double cdphi_new4= cos(deltaphi_new4);
+   	      double MTW_new4=sqrt(2*ptl*met_new4.Pt()*(1 -cdphi_new4 ));
+              if(MTW_new4>80.399&&MTW_new4<80.401){//cout<<"MTW old, px var -, py var -, MTW new "<<MTW<<"  "<<px_var<<"  "<<py_var<<"  "<<MTW_new4<<endl;
+                double ptnun=met_new4.Pt();
+                double mun= MW*MW/2 + ptl*ptnun*cdphi_new4;
+                double An=mun*pzl/(ptl*ptl);
+                //double Bn=mun*mun*pzl*pzl/(pow(ptl,4));
+                //double Cn= (El*El*ptnun*ptnun- mun*mun)/(ptl*ptl);
+                //double Dn=0;
+                //cout<<"B, C, B-C old; B, C, B-C new"<<B<<"  "<<C<<"  "<<B-C<<"  "<<Bn<<"  "<<Cn<<"  "<<Bn-Cn<<endl;
+                A=An;
+                nu_complex=met_new4;
+                found=true;
+                break;
+              }
+              TLorentzVector met_new5;
+              met_new5.SetPxPyPzE(METPx->at(1)+py_var,METPy->at(1)+px_var,METPz->at(1),METE->at(1));
+              double deltaphi_new5=DeltaPhi(mu_vector[0].Phi(), met_new5.Phi());
+              double cdphi_new5= cos(deltaphi_new5);
+   	      double MTW_new5=sqrt(2*ptl*met_new5.Pt()*(1 -cdphi_new5 ));
+              if(MTW_new5>80.399&&MTW_new5<80.401){//cout<<"MTW old, px var +, py var +, MTW new "<<MTW<<"  "<<py_var<<"  "<<px_var<<"  "<<MTW_new5<<endl;
+                double ptnun=met_new5.Pt();
+                double mun= MW*MW/2 + ptl*ptnun*cdphi_new5;
+                double An=mun*pzl/(ptl*ptl);
+                //double Bn=mun*mun*pzl*pzl/(pow(ptl,4));
+                //double Cn= (El*El*ptnun*ptnun- mun*mun)/(ptl*ptl);
+                //double Dn=0;
+                //cout<<"B, C, B-C old; B, C, B-C new"<<B<<"  "<<C<<"  "<<B-C<<"  "<<Bn<<"  "<<Cn<<"  "<<Bn-Cn<<endl;
+                A=An;
+                nu_complex=met_new5;
+                found=true;
+                break;
+              }
+              TLorentzVector met_new6;
+              met_new6.SetPxPyPzE(METPx->at(1)+py_var,METPy->at(1)-px_var,METPz->at(1),METE->at(1));
+              double deltaphi_new6=DeltaPhi(mu_vector[0].Phi(), met_new6.Phi());
+              double cdphi_new6= cos(deltaphi_new6);
+   	      double MTW_new6=sqrt(2*ptl*met_new6.Pt()*(1 -cdphi_new6 ));
+              if(MTW_new6>80.399&&MTW_new6<80.401){//cout<<"MTW old, px var +, py var -, MTW new "<<MTW<<"  "<<py_var<<"  "<<px_var<<"  "<<MTW_new6<<endl;
+                double ptnun=met_new6.Pt();
+                double mun= MW*MW/2 + ptl*ptnun*cdphi_new6;
+                double An=mun*pzl/(ptl*ptl);
+                //double Bn=mun*mun*pzl*pzl/(pow(ptl,4));
+                //double Cn= (El*El*ptnun*ptnun- mun*mun)/(ptl*ptl);
+                //double Dn=0;
+                //cout<<"B, C, B-C old; B, C, B-C new"<<B<<"  "<<C<<"  "<<B-C<<"  "<<Bn<<"  "<<Cn<<"  "<<Bn-Cn<<endl;
+                A=An;
+                nu_complex=met_new6;
+                found=true;
+                break;
+              }
+
+              TLorentzVector met_new7;
+              met_new7.SetPxPyPzE(METPx->at(1)-py_var,METPy->at(1)+px_var,METPz->at(1),METE->at(1));
+              double deltaphi_new7=DeltaPhi(mu_vector[0].Phi(), met_new7.Phi());
+              double cdphi_new7= cos(deltaphi_new7);
+   	      double MTW_new7=sqrt(2*ptl*met_new7.Pt()*(1 -cdphi_new7 ));
+              if(MTW_new7>80.399&&MTW_new7<80.401){//cout<<"MTW old, px var -, py var +, MTW new "<<MTW<<"  "<<py_var<<"  "<<px_var<<"  "<<MTW_new7<<endl;
+                double ptnun=met_new7.Pt();
+                double mun= MW*MW/2 + ptl*ptnun*cdphi_new7;
+                double An=mun*pzl/(ptl*ptl);
+                //double Bn=mun*mun*pzl*pzl/(pow(ptl,4));
+               // double Cn= (El*El*ptnun*ptnun- mun*mun)/(ptl*ptl);
+                //double Dn=0;
+                //cout<<"B, C, B-C old; B, C, B-C new"<<B<<"  "<<C<<"  "<<B-C<<"  "<<Bn<<"  "<<Cn<<"  "<<Bn-Cn<<endl;
+                A=An;
+                nu_complex=met_new7;
+                found=true;
+                break;
+              }
+
+              TLorentzVector met_new8;
+              met_new8.SetPxPyPzE(METPx->at(1)-py_var,METPy->at(1)-px_var,METPz->at(1),METE->at(1));
+              double deltaphi_new8=DeltaPhi(mu_vector[0].Phi(), met_new8.Phi());
+              double cdphi_new8= cos(deltaphi_new8);
+   	      double MTW_new8=sqrt(2*ptl*met_new8.Pt()*(1 -cdphi_new8 ));
+              if(MTW_new8>80.399&&MTW_new8<80.401){//cout<<"MTW old, px var -, py var -, MTW new "<<MTW<<"  "<<py_var<<"  "<<px_var<<"  "<<MTW_new8<<endl;
+                double ptnun=met_new8.Pt();
+                double mun= MW*MW/2 + ptl*ptnun*cdphi_new8;
+                double An=mun*pzl/(ptl*ptl);
+                //double Bn=mun*mun*pzl*pzl/(pow(ptl,4));
+               // double Cn= (El*El*ptnun*ptnun- mun*mun)/(ptl*ptl);
+                //double Dn=0;
+                //cout<<"B, C, B-C old; B, C, B-C new"<<B<<"  "<<C<<"  "<<B-C<<"  "<<Bn<<"  "<<Cn<<"  "<<Bn-Cn<<endl;
+                A=An;
+                nu_complex=met_new8;
+                found=true;
+                break;
+              }
+
+            }
+          if(found)break; 
+          }
+
+        if(found)solved_complex_count++;
+        }
+
+
+//cout<<"still alive 4"<<endl;
+
+
+
+
+
+        if((B-C)>=0)D= sqrt(B-C);
+        if(B-C<0)D=0;
+        if(B-C<0)complex_count++;
+        if((B-C)>=0)real_count++;
+        pz1= A+D;
+        pz2=A-D;
+        if((B-C<0) && !found)continue;
+        TLorentzVector nu_vector1;
+        TLorentzVector nu_vector2;
+        TLorentzVector nu_vector;
+        TLorentzVector tlep;
+        TLorentzVector thad;
+
+        if((B-C)>=0){
+          double new_E1=sqrt(METPx->at(1)*METPx->at(1) +METPy->at(1)*METPy->at(1) +pz1*pz1);
+          nu_vector1.SetPxPyPzE(METPx->at(1),METPy->at(1),pz1,new_E1);
+          double new_E2=sqrt(METPx->at(1)*METPx->at(1) +METPy->at(1)*METPy->at(1) +pz2*pz2);
+          nu_vector2.SetPxPyPzE(METPx->at(1),METPy->at(1),pz2,new_E2);
+        }
+
+        if((B-C)<0){
+          double new_E1=sqrt(nu_complex.Px()*nu_complex.Px() +nu_complex.Py()*nu_complex.Py() +pz1*pz1);
+          nu_vector1.SetPxPyPzE(METPx->at(1),METPy->at(1),pz1,new_E1);
+          double new_E2=sqrt(nu_complex.Px()*nu_complex.Px() +nu_complex.Py()*nu_complex.Py() +pz2*pz2);
+          nu_vector2.SetPxPyPzE(METPx->at(1),METPy->at(1),pz2,new_E2);
+        }
+      //  cout<<" nu1 b1, nu2 b1, nu1 b2, nu2 b2 "<<"  "<<(mu_vector[0]+nu_vector1+jet_vector[b_jet_index[0]]).M()<<"  "<<(mu_vector[0]+nu_vector2+jet_vector[b_jet_index[0]]).M()<<"  "<<(mu_vector[0]+nu_vector1+jet_vector[b_jet_index[1]]).M()<<"  "<<(mu_vector[0]+nu_vector2+jet_vector[b_jet_index[1]]).M()<<endl;
+
+        double m1=(mu_vector[0]+nu_vector1+jet_vector[b_jet_index[0]]).M();
+        double m2=(mu_vector[0]+nu_vector2+jet_vector[b_jet_index[0]]).M();
+        double m3=(mu_vector[0]+nu_vector1+jet_vector[b_jet_index[1]]).M();
+        double m4=(mu_vector[0]+nu_vector2+jet_vector[b_jet_index[1]]).M();
+        int ind2=-1;
+        if(fabs(m1-172.5) < fabs(m2-172.5)){
+          if(fabs(m3-172.5) < fabs(m4-172.5)){
+            if(fabs(m1-172.5) <fabs(m3-172.5)){//m1
+              tlep=(mu_vector[0]+nu_vector1+jet_vector[b_jet_index[0]]);
+              ind2=b_jet_index[1];
+              nu_vector=nu_vector1;
+
+            }
+            if(fabs(m1-172.5) >fabs(m3-172.5)){//m3
+              tlep=(mu_vector[0]+nu_vector1+jet_vector[b_jet_index[1]]);
+              ind2=b_jet_index[0];
+              nu_vector=nu_vector1;
+            }
+          }
+          if(fabs(m3-172.5) > fabs(m4-172.5)){
+           if(fabs(m1-172.5) <fabs(m4-172.5)){//m1
+              tlep=(mu_vector[0]+nu_vector1+jet_vector[b_jet_index[0]]);
+              ind2=b_jet_index[1];
+              nu_vector=nu_vector1;
+            }
+            if(fabs(m1-172.5) >fabs(m4-172.5)){//m4
+              tlep=(mu_vector[0]+nu_vector2+jet_vector[b_jet_index[1]]);
+              ind2=b_jet_index[0];
+              nu_vector=nu_vector2;
+            }
+          }
+        }
+
+
+        if(fabs(m1-172.5) > fabs(m2-172.5)){
+         if(fabs(m3-172.5) < fabs(m4-172.5)){
+            if(fabs(m2-172.5) <fabs(m3-172.5)){//m2
+              tlep=(mu_vector[0]+nu_vector2+jet_vector[b_jet_index[0]]);
+              ind2=b_jet_index[1];
+              nu_vector=nu_vector2;
+            }
+            if(fabs(m2-172.5) >fabs(m3-172.5)){//m3
+              tlep=(mu_vector[0]+nu_vector1+jet_vector[b_jet_index[1]]);
+              ind2=b_jet_index[0];
+              nu_vector=nu_vector1;
+            }
+          }
+          if(fabs(m3-172.5) > fabs(m4-172.5)){
+           if(fabs(m2-172.5) <fabs(m4-172.5)){//m2
+              tlep=(mu_vector[0]+nu_vector2+jet_vector[b_jet_index[0]]);
+              ind2=b_jet_index[1];
+              nu_vector=nu_vector2;
+            }
+            if(fabs(m2-172.5) >fabs(m4-172.5)){//m4
+              tlep=(mu_vector[0]+nu_vector2+jet_vector[b_jet_index[1]]);
+              ind2=b_jet_index[0];
+              nu_vector=nu_vector2;
+            }
+          }
+        }
+
+
+        if((fabs(m1-172.5) == fabs(m2-172.5) )&& (fabs(m3-172.5) == fabs(m4-172.5) )){
+           if(fabs(m1-172.5) <fabs(m3-172.5)){//m1
+              tlep=(mu_vector[0]+nu_vector1+jet_vector[b_jet_index[0]]);
+              ind2=b_jet_index[1];
+              nu_vector=nu_vector1;
+           }
+          if(fabs(m1-172.5) >fabs(m3-172.5)){//m3
+              tlep=(mu_vector[0]+nu_vector1+jet_vector[b_jet_index[1]]);
+              ind2=b_jet_index[0];
+              nu_vector=nu_vector1;
+           }
+        }
 
          double mmin=9999;
         unsigned int ljet_ind1=99, ljet_ind2=99/*, extra_jet_index=-99*/;
@@ -326,6 +700,69 @@ TH1*h_puweight=new TH1D("puweight","puweight",100000000,0,100000000);
              }
            }
          }
+
+        thad=jet_vector[ljet_ind1]+jet_vector[ljet_ind2] +jet_vector[ind2];
+
+        h_m_thad->Fill(thad.M(),w); 
+        h_m_tlep->Fill(tlep.M(),w);       
+        h_nu_pz->Fill(nu_vector.Pz());
+        h_nu_pt->Fill(nu_vector.Pt());
+
+        TLorentzVector top_vector;
+        TLorentzVector atop_vector;
+        if(mu_charge[0]>0){
+          h_m_top->Fill(tlep.M(),w);
+          h_m_atop->Fill(thad.M(),w);
+          top_vector=tlep;
+          atop_vector=thad;
+        }
+
+        if(mu_charge[0]<0){
+          h_m_atop->Fill(tlep.M(),w);
+          h_m_top->Fill(thad.M(),w);
+          atop_vector=tlep;
+          top_vector=thad;
+        }
+
+
+         h_pt_ttbar_kinrec->Fill((tlep+thad).Pt(),w);
+
+
+
+
+
+
+
+
+
+
+
+
+
+         double etab1=jet_vector[b_jet_index[0]].Eta();
+         double etab2=jet_vector[b_jet_index[1]].Eta();
+         double etamin=0;
+         if(etab1<etab2)etamin=etab1;
+         else etamin=etab2;
+         double deltaetabb=fabs(etab1-etab2);
+         int njet_bb=0;
+         for(unsigned int j_ind=0; j_ind<jet_vector.size();j_ind++){
+
+           if(j_ind==b_jet_index[0]|| j_ind==b_jet_index[1]||j_ind==ljet_ind1 ||j_ind==ljet_ind2)continue;
+           
+//           if(fabs(jet_vector[j_ind].Eta())<fabs(etab1) &&fabs(jet_vector[j_ind].Eta())<fabs(etab2) )njet_bb++;
+
+            if(jet_vector[j_ind].Eta()>etamin && jet_vector[j_ind].Eta()<etamin+deltaetabb ) njet_bb++;
+         }
+         for(unsigned int jet_vector_1530_ind =0; jet_vector_1530_ind<jet_vector_1530.size();jet_vector_1530_ind++){
+            if(jet_vector_1530[jet_vector_1530_ind].Eta()>etamin && jet_vector_1530[jet_vector_1530_ind].Eta()<etamin+deltaetabb ) njet_bb++;
+
+         }
+
+         h_njet_bb->Fill(njet_bb,w);
+         h_njet_15_ttbar->Fill(jet_vector_1530.size()+jet_vector.size()-4,w);
+         if(njet_bb>=1)h_profile_deta_bb_njet_bb->Fill(deltaetabb,njet_bb,w);
+         if((jet_vector_1530.size()+jet_vector.size())>=5)h_profile_deta_bb_njet_extra->Fill(deltaetabb,jet_vector_1530.size()+jet_vector.size()-4,w);
          h_ljet_pt->Fill(jet_vector[ljet_ind1].Pt(),w);
          h_ljet_eta->Fill(jet_vector[ljet_ind1].Eta(),w);    
 
@@ -341,15 +778,15 @@ TH1*h_puweight=new TH1D("puweight","puweight",100000000,0,100000000);
 
          h_dijet_mass->Fill((jet_vector[ljet_ind1]+jet_vector[ljet_ind2]).M(),w);  
          h_dijet_mass_narrow->Fill((jet_vector[ljet_ind1]+jet_vector[ljet_ind2]).M(),w);  
-         TLorentzVector met;
-         met.SetPxPyPzE(METPx->at(1),METPy->at(1),METPz->at(1),METE->at(1));
+//         TLorentzVector met;
+//         met.SetPxPyPzE(METPx->at(1),METPy->at(1),METPz->at(1),METE->at(1));
          h_met_meas->Fill(met.Pt(),w);
          TLorentzVector ttbar= mu_vector[0] +jet_vector[ljet_ind1]+jet_vector[ljet_ind2]+jet_vector[b_jet_index[0]]+jet_vector[b_jet_index[1]]+met;
          h_phi_ttbar->Fill(ttbar.Phi(),w);
          //cout<<ttbar.Phi()<<endl;
          h_pt_ttbar->Fill((ttbar).Pt(),w);
          h_njet_ttbar->Fill(jet_vector.size(),w);
-         h_njet_15_ttbar->Fill(njet_15,w);
+
          int n_pf=0;
          int n_pf_dphi[20];
          double ptsum_pf_dphi[20];
@@ -570,9 +1007,10 @@ TH1*h_puweight=new TH1D("puweight","puweight",100000000,0,100000000);
 
 
   TTree *weight_tree;
+  if(sum_tot_weight!=0)wtot*=(sum_tot_weight/sum_no);
   weight_tree = new TTree("tree","tree");
   weight_tree->Branch("wtot",&wtot);
-
+  cout<<sum_tot_weight/sum_no<<endl;
  // if(!sherpa)weight_tree->Branch("cnt0",&cnt0);
  // if(sherpa||mg5amcanlo)weight_tree->Branch("cnt0",&test);
 
@@ -581,6 +1019,8 @@ TH1*h_puweight=new TH1D("puweight","puweight",100000000,0,100000000);
   weight_tree->Print();
    file_out->Write();
    file_out->Close();
+cout<<      ntottt<<" Mu20 "<<N_HLT_Mu20<<" TkMu20 "<<N_HLT_TkMu20<<" Mu20 OR TkMu20 "<<N_HLT_TkMu20ORMu20<<" Mu18 "<<N_HLT_Mu18<<" TkMu18 "<<N_HLT_TkMu18<<" Mu20_eta2p1 "<<N_HLT_Mu20_eta2p1<<" TkMu20_eta2p1 "<<N_HLT_TkMu20_eta2p1<<" Mu18_eta2p1 "<<N_HLT_Mu18_eta2p1<<" TkMu18_eta2p1 "<<N_HLT_TkMu18_eta2p1<<" Mu24_eta2p1 "<<N_HLT_Mu24_eta2p1<<endl;
+   cout<<"real Nu solutions "<<real_count<<" complex solutions "<<complex_count<<" solved complex solutions "<<solved_complex_count<<" fraction of complex count "<<complex_count/(complex_count+real_count)<<" fraction of solved complex events "<<solved_complex_count/(complex_count)<<endl;    
 }
 
 int main(int argc,char **argv){

@@ -233,6 +233,22 @@ public :
    Double_t        HLT_Mu17_TkMu8;
    Double_t        HLT_Elec17_Elec8;
    Double_t        HLT_IsoMu24_eta2p1;
+    Double_t  HLT_IsoMu17_eta2p1;
+    Double_t  HLT_IsoMu20;
+    Double_t  HLT_IsoMu20_eta2p1;
+    Double_t  HLT_IsoTkMu20;
+    Double_t  HLT_IsoTkMu20_eta2p1;
+    Double_t  HLT_Mu20;
+    Double_t  HLT_TkMu20;
+
+
+    Double_t  HLT_IsoMu18;
+    Double_t  HLT_IsoMu18_eta2p1;
+    Double_t  HLT_IsoTkMu18;
+    Double_t  HLT_IsoTkMu18_eta2p1;
+    Double_t  HLT_Mu18;
+    Double_t  HLT_TkMu18;
+
    vector<double>  *patMuonPt_;
    vector<double>  *patMuonEta_;
    vector<double>  *patMuonPhi_;
@@ -451,6 +467,22 @@ public :
    TBranch        *b_HLT_Mu17_TkMu8;   //!
    TBranch        *b_HLT_Elec17_Elec8;   //!
    TBranch        *b_HLT_IsoMu24_eta2p1;   //!
+    TBranch        *b_HLT_IsoMu17_eta2p1;
+    TBranch        *b_HLT_IsoMu20;
+    TBranch        *b_HLT_IsoMu20_eta2p1;
+    TBranch        *b_HLT_IsoTkMu20;
+    TBranch        *b_HLT_IsoTkMu20_eta2p1;
+    TBranch        *b_HLT_Mu20;
+    TBranch        *b_HLT_TkMu20;
+
+
+    TBranch        *b_HLT_IsoMu18;
+    TBranch        *b_HLT_IsoMu18_eta2p1;
+    TBranch        *b_HLT_IsoTkMu18;
+    TBranch        *b_HLT_IsoTkMu18_eta2p1;
+    TBranch        *b_HLT_Mu18;
+    TBranch        *b_HLT_TkMu18;
+
    TBranch        *b_patMuonPt_;   //!
    TBranch        *b_patMuonEta_;   //!
    TBranch        *b_patMuonPhi_;   //!
@@ -626,39 +658,54 @@ tt_uev_analyzer::tt_uev_analyzer(TTree *tree) : fChain(0)
       if(doe)idd=11;
 
 
-/*
+
 //#include "25ns_data_D_uev_newlist_2110.h"//for now
-chain->Add("/home/bugra/skimmed/25ns_data_D.root");
+
+/*
+chain->Add("/sdb2/Bugra/skimmed/25ns_data_D_reminiaod.root");
+chain->Add("/sdb2/Bugra/skimmed/25ns_data_D_prompt.root");
 name="25ns_data_D_uev_newlist_2110_fromskimmed";
 */
 /*
-chain->Add("/home/bugra/skimmed/25ns_wjet.root");
+chain->Add("/sdb2/Bugra/skimmed/25ns_wjet.root");
 name="25ns_wjet_uev_miniaodv2_2110_fromskimmed";
 */
-/*
-chain->Add("/home/bugra/skimmed/25ns_tt_.root");
+
+chain->Add("/sdb2/Bugra/skimmed/25ns_tt_.root");
+//chain->Add("/home/bugra/skimmed/25ns_tt_.root");
+//chain->Add("/home/bugra/skimmed/25ns_tt__1.root");
+//chain->Add("/home/bugra/skimmed/25ns_tt__2.root");
+//chain->Add("/home/bugra/skimmed/25ns_tt__3.root");
 name="25ns_tt_uev_miniaodv2_2110_fromskimmed";
-*/
+
 /*
-chain->Add("/home/bugra/skimmed/25ns_st_t_top.root");
+chain->Add("/sdb2/Bugra/skimmed/25ns_st_t_top.root");
 name="25ns_st_t_top_uev_2110_fromskimmed";
 */
 /*
-chain->Add("/home/bugra/skimmed/25ns_st_t_atop.root");
+chain->Add("/sdb2/Bugra/skimmed/25ns_st_t_atop.root");
 name="25ns_st_t_atop_uev_2110_fromskimmed";
 */
 /*
-chain->Add("/home/bugra/skimmed/25ns_st_tw_atop.root");
+chain->Add("/sdb2/Bugra/skimmed/25ns_st_tw_atop.root");
 name="25ns_st_tw_atop_uev_2110_fromskimmed";
 */
-
-chain->Add("/home/bugra/skimmed/25ns_st_tw_top.root");
+/*
+chain->Add("/sdb2/Bugra/skimmed/25ns_st_tw_top.root");
 name="25ns_st_tw_top_uev_2110_fromskimmed";
-
-
-
-
-
+*/
+/*
+#include "inlist_powheg_hpp.h"
+name="powheg_hpp";
+*/
+/*
+#include "inlist_powheg_sdn.h"
+name="powheg_sdn";
+*/
+/*
+#include "inlist_powheg_sup.h"
+name="powheg_up";
+*/
 
 
 
@@ -710,18 +757,6 @@ name="mc_wjet_25ns_uev_miniaodv2";
 name="mc_wjet_25ns_uev";
 */
 
-/*
-#include "inlist_powheg_hpp.h"
-name="powheg_hpp";
-*/
-/*
-#include "inlist_powheg_sdn.h"
-name="powheg_sdn";
-*/
-/*
-#include "inlist_powheg_sup.h"
-name="powheg_up";
-*/
 
 /*
 #include "25ns_tt_uev.h"
@@ -739,7 +774,7 @@ name="mc_signal_25ns_uev_ttother";
 
 name += "_isElec_";
 name += doe;
-name += "_v3.root";
+name += "_v7.root";
 #endif // SINGLE_TREE
 
    }
@@ -1072,6 +1107,24 @@ void tt_uev_analyzer::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_Mu17_TkMu8", &HLT_Mu17_TkMu8, &b_HLT_Mu17_TkMu8);
    fChain->SetBranchAddress("HLT_Elec17_Elec8", &HLT_Elec17_Elec8, &b_HLT_Elec17_Elec8);
    fChain->SetBranchAddress("HLT_IsoMu24_eta2p1", &HLT_IsoMu24_eta2p1, &b_HLT_IsoMu24_eta2p1);
+
+   fChain->SetBranchAddress("HLT_IsoMu17_eta2p1", &HLT_IsoMu17_eta2p1, &b_HLT_IsoMu17_eta2p1);
+   fChain->SetBranchAddress("HLT_IsoMu20", &HLT_IsoMu20, &b_HLT_IsoMu20);
+   fChain->SetBranchAddress("HLT_IsoMu20_eta2p1", &HLT_IsoMu20_eta2p1, &b_HLT_IsoMu20_eta2p1);
+   fChain->SetBranchAddress("HLT_IsoTkMu20", &HLT_IsoTkMu20, &b_HLT_IsoTkMu20);
+   fChain->SetBranchAddress("HLT_IsoTkMu20_eta2p1", &HLT_IsoTkMu20_eta2p1, &b_HLT_IsoTkMu20_eta2p1);
+   fChain->SetBranchAddress("HLT_Mu20", &HLT_Mu20, &b_HLT_Mu20);
+   fChain->SetBranchAddress("HLT_TkMu20", &HLT_TkMu20, &b_HLT_TkMu20);
+
+
+   fChain->SetBranchAddress("HLT_IsoMu18", &HLT_IsoMu18, &b_HLT_IsoMu18);
+   fChain->SetBranchAddress("HLT_IsoMu18_eta2p1", &HLT_IsoMu18_eta2p1, &b_HLT_IsoMu18_eta2p1);
+   fChain->SetBranchAddress("HLT_IsoTkMu18", &HLT_IsoTkMu18, &b_HLT_IsoTkMu18);
+   fChain->SetBranchAddress("HLT_IsoTkMu18_eta2p1", &HLT_IsoTkMu18_eta2p1, &b_HLT_IsoTkMu18_eta2p1);
+   fChain->SetBranchAddress("HLT_Mu18", &HLT_Mu18, &b_HLT_Mu18);
+   fChain->SetBranchAddress("HLT_TkMu18", &HLT_TkMu18, &b_HLT_TkMu18);
+
+
    fChain->SetBranchAddress("patMuonPt_", &patMuonPt_, &b_patMuonPt_);
    fChain->SetBranchAddress("patMuonEta_", &patMuonEta_, &b_patMuonEta_);
    fChain->SetBranchAddress("patMuonPhi_", &patMuonPhi_, &b_patMuonPhi_);

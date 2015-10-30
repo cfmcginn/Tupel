@@ -232,6 +232,22 @@ public :
    Double_t        HLT_Mu17_TkMu8;
    Double_t        HLT_Elec17_Elec8;
    Double_t        HLT_IsoMu24_eta2p1;
+    Double_t  HLT_IsoMu17_eta2p1;
+    Double_t  HLT_IsoMu20;
+    Double_t  HLT_IsoMu20_eta2p1;
+    Double_t  HLT_IsoTkMu20;
+    Double_t  HLT_IsoTkMu20_eta2p1;
+    Double_t  HLT_Mu20;
+    Double_t  HLT_TkMu20;
+
+
+    Double_t  HLT_IsoMu18;
+    Double_t  HLT_IsoMu18_eta2p1;
+    Double_t  HLT_IsoTkMu18;
+    Double_t  HLT_IsoTkMu18_eta2p1;
+    Double_t  HLT_Mu18;
+    Double_t  HLT_TkMu18;
+
    vector<double>  *patMuonPt_;
    vector<double>  *patMuonEta_;
    vector<double>  *patMuonPhi_;
@@ -449,6 +465,23 @@ public :
    TBranch        *b_HLT_Mu17_TkMu8;   //!
    TBranch        *b_HLT_Elec17_Elec8;   //!
    TBranch        *b_HLT_IsoMu24_eta2p1;   //!
+    TBranch        *b_HLT_IsoMu17_eta2p1;
+    TBranch        *b_HLT_IsoMu20;
+    TBranch        *b_HLT_IsoMu20_eta2p1;
+    TBranch        *b_HLT_IsoTkMu20;
+    TBranch        *b_HLT_IsoTkMu20_eta2p1;
+    TBranch        *b_HLT_Mu20;
+    TBranch        *b_HLT_TkMu20;
+
+
+    TBranch        *b_HLT_IsoMu18;
+    TBranch        *b_HLT_IsoMu18_eta2p1;
+    TBranch        *b_HLT_IsoTkMu18;
+    TBranch        *b_HLT_IsoTkMu18_eta2p1;
+    TBranch        *b_HLT_Mu18;
+    TBranch        *b_HLT_TkMu18;
+
+
    TBranch        *b_patMuonPt_;   //!
    TBranch        *b_patMuonEta_;   //!
    TBranch        *b_patMuonPhi_;   //!
@@ -622,18 +655,22 @@ tt_skimmer::tt_skimmer(TTree *tree) : fChain(0)
       TChain * chain = new TChain("tupel/MuonTree","");
       if(doe)idd=11;
 
-
-#include "25ns_data_D_uev_newlist_2110_forskimmer.h"
-name="25ns_data_D.root";
-
+/*
+#include "25ns_data_D_prompt_uev_newlist_2110_forskimmer.h"
+name="25ns_data_D_prompt.root";
+*/
+/*
+#include "25ns_data_D_reminiaod_uev_newlist_2110_forskimmer.h"
+name="25ns_data_D_reminiaod.root";
+*/
 /*
 #include "25ns_wjet_uev_miniaodv2_2110_forskimmer.h"
 name="25ns_wjet.root";
 */
-/*
-#include "25ns_tt_uev_miniaodv2_2110_forskimmer.h"
-name="25ns_tt_.root";
-*/
+
+#include "small_25ns_tt_uev_miniaodv2_2110_forskimmer.h"
+name="small_25ns_tt_.root";
+
 /*
 #include "25ns_st_t_top_uev_2110_forskimmer.h"
 name="25ns_st_t_top.root";
@@ -650,6 +687,19 @@ name="25ns_st_tw_atop.root";
 #include "25ns_st_tw_top_uev_2110_forskimmer.h"
 name="25ns_st_tw_top.root";
 */
+/*
+#include "inlist_powheg_hpp.h"
+name="powheg_hpp.root";
+*/
+/*
+#include "inlist_powheg_sdn.h"
+name="powheg_sdn.root";
+*/
+/*
+#include "inlist_powheg_sup.h"
+name="powheg_up.root";
+*/
+
 
 
 
@@ -996,6 +1046,24 @@ void tt_skimmer::Init(TTree *tree)
    fChain->SetBranchAddress("HLT_Mu17_TkMu8", &HLT_Mu17_TkMu8, &b_HLT_Mu17_TkMu8);
    fChain->SetBranchAddress("HLT_Elec17_Elec8", &HLT_Elec17_Elec8, &b_HLT_Elec17_Elec8);
    fChain->SetBranchAddress("HLT_IsoMu24_eta2p1", &HLT_IsoMu24_eta2p1, &b_HLT_IsoMu24_eta2p1);
+
+   fChain->SetBranchAddress("HLT_IsoMu17_eta2p1", &HLT_IsoMu17_eta2p1, &b_HLT_IsoMu17_eta2p1);
+   fChain->SetBranchAddress("HLT_IsoMu20", &HLT_IsoMu20, &b_HLT_IsoMu20);
+   fChain->SetBranchAddress("HLT_IsoMu20_eta2p1", &HLT_IsoMu20_eta2p1, &b_HLT_IsoMu20_eta2p1);
+   fChain->SetBranchAddress("HLT_IsoTkMu20", &HLT_IsoTkMu20, &b_HLT_IsoTkMu20);
+   fChain->SetBranchAddress("HLT_IsoTkMu20_eta2p1", &HLT_IsoTkMu20_eta2p1, &b_HLT_IsoTkMu20_eta2p1);
+   fChain->SetBranchAddress("HLT_Mu20", &HLT_Mu20, &b_HLT_Mu20);
+   fChain->SetBranchAddress("HLT_TkMu20", &HLT_TkMu20, &b_HLT_TkMu20);
+
+
+   fChain->SetBranchAddress("HLT_IsoMu18", &HLT_IsoMu18, &b_HLT_IsoMu18);
+   fChain->SetBranchAddress("HLT_IsoMu18_eta2p1", &HLT_IsoMu18_eta2p1, &b_HLT_IsoMu18_eta2p1);
+   fChain->SetBranchAddress("HLT_IsoTkMu18", &HLT_IsoTkMu18, &b_HLT_IsoTkMu18);
+   fChain->SetBranchAddress("HLT_IsoTkMu18_eta2p1", &HLT_IsoTkMu18_eta2p1, &b_HLT_IsoTkMu18_eta2p1);
+   fChain->SetBranchAddress("HLT_Mu18", &HLT_Mu18, &b_HLT_Mu18);
+   fChain->SetBranchAddress("HLT_TkMu18", &HLT_TkMu18, &b_HLT_TkMu18);
+
+
    fChain->SetBranchAddress("patMuonPt_", &patMuonPt_, &b_patMuonPt_);
    fChain->SetBranchAddress("patMuonEta_", &patMuonEta_, &b_patMuonEta_);
    fChain->SetBranchAddress("patMuonPhi_", &patMuonPhi_, &b_patMuonPhi_);

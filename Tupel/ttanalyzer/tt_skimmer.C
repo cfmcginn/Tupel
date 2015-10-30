@@ -74,13 +74,13 @@ cout<<"burda"<<endl;
 // standalone_LumiReWeighting puWeight(2015), puUp(2015,1), puDown(2015,-1);
    Long64_t nentries = fChain->GetEntries();
   cout<<nentries<<endl;
-//   nentries = 100;
+   nentries = 1000000;
  TH1::SetDefaultSumw2();
  TH2::SetDefaultSumw2();
  TProfile::SetDefaultSumw2();
    Long64_t nbytes = 0, nb = 0;
 
-   TFile* file_out = new TFile("/home/bugra/skimmed/" + name,"RECREATE"); 
+   TFile* file_out = new TFile("/sdb2/Bugra/skimmed/" + name,"RECREATE"); 
    file_out->cd();	
    TTree *weight_tree;
   weight_tree = new TTree("MuonTree","MuonTree");
@@ -174,11 +174,34 @@ cout<<"burda"<<endl;
     weight_tree->Branch("MGjE",&MGjE); 
     
     //HLT
-    weight_tree->Branch("HLT_Mu17_Mu8",&HLT_Mu17_Mu8);
+/*    weight_tree->Branch("HLT_Mu17_Mu8",&HLT_Mu17_Mu8);
     weight_tree->Branch("HLT_Mu17_TkMu8",&HLT_Mu17_TkMu8);
     weight_tree->Branch("HLT_Elec17_Elec8",&HLT_Elec17_Elec8);
     weight_tree->Branch("HLT_IsoMu24_eta2p1",&HLT_IsoMu24_eta2p1);
-    
+  */  
+
+
+   weight_tree->Branch("HLT_Mu17_Mu8",&HLT_Mu17_Mu8);
+    weight_tree->Branch("HLT_Mu17_TkMu8",&HLT_Mu17_TkMu8);
+    weight_tree->Branch("HLT_Elec17_Elec8",&HLT_Elec17_Elec8);
+    weight_tree->Branch("HLT_IsoMu24_eta2p1",&HLT_IsoMu24_eta2p1);
+     weight_tree->Branch("HLT_IsoMu17_eta2p1",&HLT_IsoMu17_eta2p1); 
+     weight_tree->Branch("HLT_IsoMu20",&HLT_IsoMu20); 
+     weight_tree->Branch("HLT_IsoMu20_eta2p1",&HLT_IsoMu20_eta2p1); 
+     weight_tree->Branch("HLT_IsoTkMu20",&HLT_IsoTkMu20); 
+     weight_tree->Branch("HLT_IsoTkMu20_eta2p1",&HLT_IsoTkMu20_eta2p1);
+     weight_tree->Branch("HLT_Mu20",&HLT_Mu20); 
+     weight_tree->Branch("HLT_TkMu20",&HLT_TkMu20); 
+
+
+     weight_tree->Branch("HLT_IsoMu18",&HLT_IsoMu18); 
+     weight_tree->Branch("HLT_IsoMu18_eta2p1",&HLT_IsoMu18_eta2p1); 
+     weight_tree->Branch("HLT_IsoTkMu18",&HLT_IsoTkMu18);
+     weight_tree->Branch("HLT_IsoTkMu18_eta2p1",&HLT_IsoTkMu18_eta2p1); 
+     weight_tree->Branch("HLT_Mu18",&HLT_Mu18); 
+     weight_tree->Branch("HLT_TkMu18",&HLT_TkMu18); 
+
+
     //Muons
     weight_tree->Branch("patMuonPt_",&patMuonPt_);
     weight_tree->Branch("patMuonEta_",&patMuonEta_);
@@ -321,7 +344,7 @@ cout<<"burda"<<endl;
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
-      if(jentry%10000==0)cout<<"/home/bugra/skimmed/" <<name<<" << "<<jentry<<"/"<<nentries<<endl;
+      if(jentry%10000==0)cout<<"/sdb2/Bugra/skimmed/" <<name<<" << "<<jentry<<"/"<<nentries<<endl;
       bool found_mu=false;
       bool found4jet=false;
       // if (Cut(ientry) < 0) continue;
